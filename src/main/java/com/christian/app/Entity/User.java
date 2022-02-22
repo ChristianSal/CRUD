@@ -1,10 +1,15 @@
 package com.christian.app.Entity;
 
+import lombok.*;
+
 import javax.persistence.*;
 import java.io.Serializable;
 
 @Entity
 @Table
+@Data
+@NoArgsConstructor
+
 public class User implements Serializable {
 
 
@@ -20,43 +25,15 @@ public class User implements Serializable {
     private String email;
     private Boolean enabled;
 
-    public long getId() {
-        return id;
-    }
+    private String imagePath;
 
-    public void setId(long id) {
-        this.id = id;
-    }
+    @Transient
+    private String imageUrl;
 
-    public String getName() {
-        return name;
-    }
+    private String docPath;
 
-    public void setName(String name) {
-        this.name = name;
-    }
+    @Transient
+    private String docUrl;
 
-    public String getPassword() {
-        return password;
-    }
 
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public Boolean getEnabled() {
-        return enabled;
-    }
-
-    public void setEnabled(Boolean enabled) {
-        this.enabled = enabled;
-    }
 }

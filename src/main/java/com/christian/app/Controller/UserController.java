@@ -1,6 +1,7 @@
 package com.christian.app.Controller;
 
 import com.christian.app.Entity.User;
+import com.christian.app.Service.S3Service;
 import com.christian.app.Service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -18,18 +19,33 @@ public class UserController {
     @Autowired
     private UserService userService;
 
+    @Autowired
+    private S3Service s3Service;
+
 
     @PostMapping
     public ResponseEntity<?> create (@RequestBody User user){
-        return ResponseEntity.status(HttpStatus.CREATED).body(userService.save(user));
+        //ResponseEntity.status(HttpStatus.CREATED).body(userService.save(user));
+        userService.save(user);
+        user.setImageUrl(s3Service.getObjectUrl(user.getImagePath()));
+        user.setDocUrl(s3Service.getObjectUrl(user.getDocPath()));
+        return ResponseEntity.status(HttpStatus.CREATED).body(user);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<?> read(@PathVariable(value="id") Long userId){
-        Optional<User> optionalUser=userService.findById(userId);
-        if(!optionalUser.isPresent()){
+        List<User> optionalUser=userService.findById(userId).stream()
+                .peek(user->user.setImageUrl(s3Service.getObjectUrl(user.getImagePath())))
+                .peek(user->user.setDocUrl(s3Service.getObjectUrl(user.getDocPath())))
+                .collect(Collectors.toList());
+        if(optionalUser.isEmpty()){
             return ResponseEntity.notFound().build();
         }
+
+
+
+
+
         return ResponseEntity.ok(optionalUser);
     }
 
@@ -60,7 +76,10 @@ public class UserController {
     @GetMapping
     public List<User> readAll(){
         List<User> users= StreamSupport.stream(userService.findAll().spliterator(),false)
+                .peek(user->user.setImageUrl(s3Service.getObjectUrl(user.getImagePath())))
+                .peek(user->user.setDocUrl(s3Service.getObjectUrl(user.getDocPath())))
                 .collect(Collectors.toList());
         return users;
+
     }
 }
